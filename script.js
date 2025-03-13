@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const categoryFilters = document.getElementById('categoryFilters');
     let allData = []; // Сохраняем все загруженные данные здесь
     let categories = []; // Сохраняем список категорий
+    const cache = {}; // Объект для кэширования данных
 
     // Функция для загрузки категорий
     async function loadCategories() {
@@ -45,6 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Функция для загрузки данных из выбранных категорий
     async function loadSelectedCategories() {
         allData = []; // Очищаем все данные перед загрузкой
+
         const selectedCategories = Array.from(document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.value);
 
@@ -58,9 +60,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const category = categories.find(cat => cat.id === categoryId);
             if (category) {
                 try {
-                    const response = await fetch(category.url);
-                    const categoryData = await response.json();
-                    allData = allData.concat(categoryData); // Добавляем данные к общему массиву
+                    // Проверяем, есть ли данные в кэше
+                    if (cache[category.url]) {
+                        allData = allData.concat(cache[category.url]); // Используем данные из кэша
+                    } else {
+                        // Если данных нет в кэше, загружаем их
+                        const response = await fetch(category.url);
+                        const categoryData = await response.json();
+                        cache[category.url] = categoryData; // Сохраняем данные в кэше
+                        allData = allData.concat(categoryData); // Добавляем данные к общему массиву
+                    }
                 } catch (error) {
                     console.error(`Ошибка загрузки данных из категории ${categoryId}:`, error);
                 }
