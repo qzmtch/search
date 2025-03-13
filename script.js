@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const cardContainer = document.getElementById('cardContainer');
     const categoryFilters = document.getElementById('categoryFilters');
-    const searchButton = document.getElementById('searchButton'); // Получаем кнопку поиска
 
     let allData = []; // Сохраняем все загруженные данные здесь
     let categories = []; // Сохраняем список категорий
     const cache = {}; // Объект для кэширования данных
+    let dataLoaded = false; // Флаг, указывающий, были ли загружены данные
 
     // Функция для загрузки категорий
     async function loadCategories() {
@@ -40,15 +40,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
             categoryFilters.appendChild(div);
 
-            // Убираем обработчик события change с чекбокса
-            //checkbox.addEventListener('change', loadSelectedCategories);
+            // Добавляем обработчик события change для чекбокса
+            checkbox.addEventListener('change', function() {
+                loadSelectedCategoriesAndRender();
+            });
         });
     }
 
-    // Функция для загрузки данных из выбранных категорий (теперь вызывается по нажатию кнопки)
-    async function loadSelectedCategories() {
+    // Функция для загрузки данных из выбранных категорий и отображения (вместо разделения)
+    async function loadSelectedCategoriesAndRender() {
+      if (!dataLoaded) {
         allData = []; // Очищаем все данные перед загрузкой
-
         const selectedCategories = Array.from(document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked'))
             .map(checkbox => checkbox.value);
 
@@ -77,7 +79,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         }
-
+        dataLoaded = true; // Устанавливаем флаг, что данные загружены
+      }
         renderCards(filterData(searchInput.value)); // Отображаем отфильтрованные данные
     }
 
@@ -116,15 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Обработчик события ввода в поле поиска (без изменений)
-    // searchInput.addEventListener('input', function() {
-    //     const searchTerm = searchInput.value;
-    //     const filteredResults = filterData(searchTerm);
-    //     renderCards(filteredResults);
-    // });
-
-    // Обработчик события нажатия кнопки "Поиск"
-    searchButton.addEventListener('click', function() {
-        loadSelectedCategories();
+    searchInput.addEventListener('input', function() {
+        const searchTerm = searchInput.value;
+        const filteredResults = filterData(searchTerm);
+        renderCards(filteredResults);
     });
 
     // Загружаем категории при загрузке страницы
