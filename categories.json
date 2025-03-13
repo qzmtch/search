@@ -1,0 +1,17 @@
+[
+  {
+    "id": "category1",
+    "name": "Категория 1",
+    "url": "category1.json"
+  },
+  {
+    "id": "category2",
+    "name": "Категория 2",
+    "url": "category2.json"
+  },
+  {
+    "id": "category3",
+    "name": "Категория 3",
+    "url": "category3.json"
+  }
+]
