@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const cardContainer = document.getElementById('cardContainer');
     const categoryFilters = document.getElementById('categoryFilters');
-    const searchButton = document.getElementById('searchButton'); // Получаем кнопку поиска
 
     let allData = []; // Сохраняем все загруженные данные здесь
     let categories = []; // Сохраняем список категорий
@@ -40,12 +39,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
             categoryFilters.appendChild(div);
 
-            // Убираем обработчик события change с чекбокса
-            //checkbox.addEventListener('change', loadSelectedCategories);
+            // Добавляем обработчик события change для чекбокса
+            checkbox.addEventListener('change', loadSelectedCategories);
         });
     }
 
-    // Функция для загрузки данных из выбранных категорий (теперь вызывается по нажатию кнопки)
+    // Функция для загрузки данных из выбранных категорий
     async function loadSelectedCategories() {
         allData = []; // Очищаем все данные перед загрузкой
 
@@ -116,17 +115,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Обработчик события ввода в поле поиска (без изменений)
-    // searchInput.addEventListener('input', function() {
-    //     const searchTerm = searchInput.value;
-    //     const filteredResults = filterData(searchTerm);
-    //     renderCards(filteredResults);
-    // });
-
-    // Обработчик события нажатия кнопки "Поиск"
-    searchButton.addEventListener('click', function() {
-        loadSelectedCategories();
+    searchInput.addEventListener('input', function() {
+        const searchTerm = searchInput.value;
+        const filteredResults = filterData(searchTerm);
+        renderCards(filteredResults);
     });
 
     // Загружаем категории при загрузке страницы
     loadCategories();
+
+    //  Убираем загрузку данных при инициализации
+    //loadSelectedCategories();
 });
