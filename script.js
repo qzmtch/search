@@ -1,21 +1,76 @@
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const cardContainer = document.getElementById('cardContainer');
-    let data = []; // Сохраняем данные здесь
+    const categoryFilters = document.getElementById('categoryFilters');
+    let allData = []; // Сохраняем все загруженные данные здесь
+    let categories = []; // Сохраняем список категорий
 
-    // Функция для загрузки данных из JSON
-    async function loadData() {
+    // Функция для загрузки категорий
+    async function loadCategories() {
         try {
-            const response = await fetch('data.json');
-            data = await response.json();
-            renderCards(data); // Отображаем все карточки при загрузке
+            const response = await fetch('categories.json');
+            categories = await response.json();
+            renderCategoryFilters(categories);
         } catch (error) {
-            console.error('Ошибка загрузки данных:', error);
-            cardContainer.innerHTML = '<p>Ошибка загрузки данных.</p>';
+            console.error('Ошибка загрузки категорий:', error);
+            categoryFilters.innerHTML = '<p>Ошибка загрузки категорий.</p>';
         }
     }
 
-    // Функция для отображения карточек
+    // Функция для отображения чекбоксов категорий
+    function renderCategoryFilters(categories) {
+        categoryFilters.innerHTML = ''; // Очищаем контейнер
+
+        categories.forEach(category => {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = category.id;
+            checkbox.value = category.id;
+
+            const label = document.createElement('label');
+            label.htmlFor = category.id;
+            label.textContent = category.name;
+
+            const div = document.createElement('div');
+            div.appendChild(checkbox);
+            div.appendChild(label);
+
+            categoryFilters.appendChild(div);
+
+            // Добавляем обработчик события change для чекбокса
+            checkbox.addEventListener('change', loadSelectedCategories);
+        });
+    }
+
+    // Функция для загрузки данных из выбранных категорий
+    async function loadSelectedCategories() {
+        allData = []; // Очищаем все данные перед загрузкой
+        const selectedCategories = Array.from(document.querySelectorAll('#categoryFilters input[type="checkbox"]:checked'))
+            .map(checkbox => checkbox.value);
+
+        if (selectedCategories.length === 0) {
+            renderCards([]); // Если ничего не выбрано, показываем пустой результат
+            return;
+        }
+
+        // Загружаем данные из каждой выбранной категории
+        for (const categoryId of selectedCategories) {
+            const category = categories.find(cat => cat.id === categoryId);
+            if (category) {
+                try {
+                    const response = await fetch(category.url);
+                    const categoryData = await response.json();
+                    allData = allData.concat(categoryData); // Добавляем данные к общему массиву
+                } catch (error) {
+                    console.error(`Ошибка загрузки данных из категории ${categoryId}:`, error);
+                }
+            }
+        }
+
+        renderCards(allData); // Отображаем все загруженные данные
+    }
+
+    // Функция для отображения карточек (без изменений)
     function renderCards(items) {
         cardContainer.innerHTML = ''; // Очищаем контейнер
 
@@ -36,10 +91,10 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Функция для фильтрации данных
+    // Функция для фильтрации данных (без изменений)
     function filterData(searchTerm) {
         const searchTermLower = searchTerm.toLowerCase();
-        const filteredData = data.filter(item => {
+        const filteredData = allData.filter(item => { // Ищем во всех загруженных данных
             return (
                 item.title.toLowerCase().includes(searchTermLower) ||
                 item.description.toLowerCase().includes(searchTermLower) ||
@@ -49,13 +104,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return filteredData;
     }
 
-    // Обработчик события ввода в поле поиска
+    // Обработчик события ввода в поле поиска (без изменений)
     searchInput.addEventListener('input', function() {
         const searchTerm = searchInput.value;
         const filteredResults = filterData(searchTerm);
         renderCards(filteredResults);
     });
 
-    // Загружаем данные при загрузке страницы
-    loadData();
+    // Загружаем категории при загрузке страницы
+    loadCategories();
 });
